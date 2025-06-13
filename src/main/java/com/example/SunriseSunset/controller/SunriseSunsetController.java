@@ -30,11 +30,6 @@ public class SunriseSunsetController {
         return dto != null ? ResponseEntity.ok(dto) : ResponseEntity.notFound().build();
     }
 
-    @GetMapping("/bulk")
-    public ResponseEntity<List<SunriseSunsetDto>> getSunriseSunsetsByIds(
-            @RequestParam("ids") List<Integer> ids) {
-        return ResponseEntity.ok(sunService.getSunriseSunsetsByIds(ids));
-    }
 
     @GetMapping("/all")
     public ResponseEntity<List<SunriseSunsetDto>> getAllSunriseSunsets() {
@@ -70,21 +65,4 @@ public class SunriseSunsetController {
         }
     }
 
-    @PostMapping("/bulk")
-    public ResponseEntity<List<SunriseSunsetDto>> bulkCreateSunriseSunsets(@RequestBody List<SunriseSunsetDto> dtos) {
-        return ResponseEntity.ok(sunService.bulkCreateSunriseSunsets(dtos));
-    }
-
-    @DeleteMapping("/bulk")
-    public ResponseEntity<Void> bulkDeleteSunriseSunsets(@RequestBody List<Integer> ids) {
-        sunService.bulkDeleteSunriseSunsets(ids);
-        return ResponseEntity.noContent().build();
-    }
-
-    @DeleteMapping("/bulk-by-ids")
-    public ResponseEntity<Void> bulkDeleteSunriseSunsetsByQuery(
-            @RequestParam("ids") List<Integer> ids) {
-        sunService.bulkDeleteSunriseSunsets(ids);
-        return ResponseEntity.noContent().build();
-    }
 }
