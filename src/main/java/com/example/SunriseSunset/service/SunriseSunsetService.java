@@ -61,7 +61,7 @@ public class SunriseSunsetService {
         SunriseSunsetEntity savedEntity = sunriseSunsetRepository.save(entity);
         SunriseSunsetDto savedDto = convertToDTO(savedEntity);
 
-        
+
         logger.info("Caching {} {} after creation", CACHE_PREFIX_SUNRISE, savedEntity.id);
         entityCache.put(CACHE_PREFIX_SUNRISE + savedEntity.id, savedDto);
         entityCache.remove(CACHE_KEY_ALL);
@@ -223,15 +223,4 @@ public class SunriseSunsetService {
         return savedDtos;
     }
 
-    public void bulkDeleteSunriseSunsets(List<Integer> ids) {
-        List<SunriseSunsetEntity> entities = sunriseSunsetRepository.findAllById(ids);
-        entities.forEach(entity -> {
-            entity.locations.forEach(location -> location.sunriseSunsets.remove(entity));
-            entity.locations.clear();
-        });
-        sunriseSunsetRepository.saveAll(entities);
-        sunriseSunsetRepository.deleteAllById(ids);
-        ids.forEach(id -> entityCache.remove(CACHE_PREFIX_SUNRISE + id));
-        entityCache.remove(CACHE_KEY_ALL);
-    }
 }
