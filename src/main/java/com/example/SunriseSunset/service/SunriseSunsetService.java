@@ -20,7 +20,6 @@ import java.util.stream.Collectors;
 import java.util.ArrayList;
 
 @Service
-@SuppressWarnings("unchecked")
 public class SunriseSunsetService {
 
     private static final Logger logger = LoggerFactory.getLogger(SunriseSunsetService.class);
@@ -62,7 +61,7 @@ public class SunriseSunsetService {
         SunriseSunsetEntity savedEntity = sunriseSunsetRepository.save(entity);
         SunriseSunsetDto savedDto = convertToDTO(savedEntity);
 
-        // Cache the new entry
+        
         logger.info("Caching {} {} after creation", CACHE_PREFIX_SUNRISE, savedEntity.id);
         entityCache.put(CACHE_PREFIX_SUNRISE + savedEntity.id, savedDto);
         entityCache.remove(CACHE_KEY_ALL);
