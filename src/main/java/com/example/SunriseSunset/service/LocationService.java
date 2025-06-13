@@ -2,13 +2,13 @@ package com.example.SunriseSunset.service;
 
 import com.example.SunriseSunset.dto.LocationDto;
 import com.example.SunriseSunset.model.LocationEntity;
-import com.example.SunriseSunset.model.SunriseSunsetEntity;
 import com.example.SunriseSunset.repository.LocationRepository;
 import com.example.SunriseSunset.repository.SunriseSunsetRepository;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
@@ -25,6 +25,7 @@ public class LocationService {
     private final LocationRepository locationRepository;
     private final SunriseSunsetRepository sunriseSunsetRepository;
     private final Map<String, Object> entityCache;
+    private final RequestCounterService requestCounterService;
 
     @Autowired
     public LocationService(LocationRepository locationRepository,
@@ -33,9 +34,11 @@ public class LocationService {
         this.locationRepository = locationRepository;
         this.sunriseSunsetRepository = sunriseSunsetRepository;
         this.entityCache = entityCache;
+        this.requestCounterService = new RequestCounterService();
     }
 
     public LocationDto createLocation(LocationDto dto) {
+        requestCounterService.increment();
         LocationEntity entity = new LocationEntity();
         entity.name = dto.getName();
         entity.country = dto.getCountry();
@@ -55,6 +58,7 @@ public class LocationService {
     }
 
     public LocationDto getLocationById(Integer id) {
+        requestCounterService.increment();
         String cacheKey = CACHE_PREFIX_LOCATION + id;
         if (entityCache.containsKey(cacheKey)) {
             logger.debug("Cache hit for {} {}", CACHE_PREFIX_LOCATION, id);
@@ -72,6 +76,7 @@ public class LocationService {
     }
 
     public List<LocationDto> getLocationsByIds(List<Integer> ids) {
+        requestCounterService.increment();
         List<LocationEntity> entities = locationRepository.findAllById(ids);
         List<LocationDto> dtos = entities.stream()
                 .map(this::convertToDTO)
@@ -82,6 +87,7 @@ public class LocationService {
     }
 
     public List<LocationDto> getAllLocations() {
+        requestCounterService.increment();
         if (entityCache.containsKey(CACHE_KEY_ALL)) {
             logger.debug("Cache hit for all Locations");
             return (List<LocationDto>) entityCache.get(CACHE_KEY_ALL);
@@ -100,6 +106,7 @@ public class LocationService {
     }
 
     public LocationDto updateLocation(Integer id, LocationDto dto) {
+        requestCounterService.increment();
         LocationEntity entity = locationRepository.findById(id)
                 .orElseThrow(() -> new IllegalArgumentException("Location not found with id: " + id));
 
@@ -122,6 +129,7 @@ public class LocationService {
     }
 
     public void deleteLocation(Integer id) {
+        requestCounterService.increment();
         if (!locationRepository.existsById(id)) {
             throw new IllegalArgumentException("Location not found with id: " + id);
         }
@@ -139,6 +147,7 @@ public class LocationService {
     }
 
     public List<LocationDto> bulkCreateLocations(List<LocationDto> dtos) {
+        requestCounterService.increment();
         List<LocationEntity> entities = new ArrayList<>();
         dtos.forEach(dto -> {
             LocationEntity entity = new LocationEntity();
@@ -162,6 +171,7 @@ public class LocationService {
     }
 
     public void bulkDeleteLocations(List<Integer> ids) {
+        requestCounterService.increment();
         List<LocationEntity> locations = locationRepository.findAllById(ids);
         locations.forEach(location -> {
             location.sunriseSunsets.forEach(ss -> ss.locations.remove(location));
@@ -171,5 +181,13 @@ public class LocationService {
         locationRepository.deleteAllById(ids);
         ids.forEach(id -> entityCache.remove(CACHE_PREFIX_LOCATION + id));
         entityCache.remove(CACHE_KEY_ALL);
+    }
+
+    public long getRequestCount() {
+        return requestCounterService.getCount();
+    }
+
+    public void resetRequestCount() {
+        requestCounterService.reset();
     }
 }
