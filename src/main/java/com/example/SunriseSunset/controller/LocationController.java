@@ -8,11 +8,11 @@ import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.tags.Tag;
-import java.util.List;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
-/**REST controller for managing location-related operations.*/
+import java.util.List;
+
 @RestController
 @RequestMapping("/locations")
 @Tag(name = "Location Controller", description = "API for managing locations")
@@ -43,14 +43,6 @@ public class LocationController {
         return dto != null ? ResponseEntity.ok(dto) : ResponseEntity.notFound().build();
     }
 
-    @Operation(summary = "Get multiple locations by IDs", responses = {
-            @ApiResponse(responseCode = "200", description = "List of locations",
-                    content = @Content(schema = @Schema(implementation = LocationDto.class)))})
-    @GetMapping("/bulk")
-    public ResponseEntity<List<LocationDto>> getLocationsByIds(
-            @RequestParam("ids") List<Integer> ids) {
-        return ResponseEntity.ok(locationService.getLocationsByIds(ids));
-    }
 
     @Operation(summary = "Get all locations", responses = {
             @ApiResponse(responseCode = "200", description = "List of all locations",
@@ -90,20 +82,4 @@ public class LocationController {
         return ResponseEntity.ok(locationService.bulkCreateLocations(dtos));
     }
 
-    @Operation(summary = "Bulk delete locations", responses = {
-            @ApiResponse(responseCode = "204", description = "Locations deleted successfully")})
-    @DeleteMapping("/bulk")
-    public ResponseEntity<Void> bulkDeleteLocations(@RequestBody List<Integer> ids) {
-        locationService.bulkDeleteLocations(ids);
-        return ResponseEntity.noContent().build();
-    }
-
-    @Operation(summary = "Bulk delete locations by IDs", responses = {
-            @ApiResponse(responseCode = "204", description = "Locations deleted successfully")})
-    @DeleteMapping("/bulk-by-ids")
-    public ResponseEntity<Void> bulkDeleteLocationsByQuery(
-            @RequestParam("ids") List<Integer> ids) {
-        locationService.bulkDeleteLocations(ids);
-        return ResponseEntity.noContent().build();
-    }
 }
